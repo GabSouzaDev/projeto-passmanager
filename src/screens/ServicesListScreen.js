@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FlatList, View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal, TextInput } from "react-native";
+import { FlatList, View, Text, SafeAreaView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal, TextInput, TouchableWithoutFeedback, Keyboard } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ServicesContext } from '../context/ServicesContext';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Clipboard from 'expo-clipboard';
 import { generateRandomPassword } from '../utils/utils';
 import styles from '../styles/Styles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from "expo-secure-store";
 import Slider from '@react-native-community/slider';
 
 const ServicesListScreen = () => {
@@ -167,7 +167,7 @@ const ServicesListScreen = () => {
 
     //atualiza o estado e AsyncStorage
     await updateService(updatedServices);
-    AsyncStorage.setItem('services', JSON.stringify(updatedServices));
+    SecureStore.setItemAsync('services', JSON.stringify(updatedServices));
 
     Alert.alert("Sucesso", "Login atualizado com sucesso!");
     setModalVisible(false);
@@ -241,88 +241,96 @@ const ServicesListScreen = () => {
               renderItem={renderItem}
           />
 
+          
           <Modal
             visible={modalVisible}
             animationType='slide'
             onRequestClose={() => setModalVisible(false)}
           >
             <SafeAreaView style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Editar Login</Text>
-
-              <View style={styles.inputContainer}>
-                <Icon name="user" size={20} color="#999" style={styles.iconInput}/>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Usuário"
-                  value={newUsername}
-                  onChangeText={setNewUsername}
-                />
-              </View>
-              <View style={styles.inputContainer}>
-                <Icon name="lock" size={20} color="#999" style={styles.iconInput}/>
-                <View style={styles.passwordContainer}>
-                  <TextInput 
-                    style={styles.passwordInput}
-                    placeholder="Password"
-                    value={newPassword}
-                    secureTextEntry={!passwordVisible}
-                    onChangeText={setNewPassword}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeIcon}
-                    onPress={() => setPasswordVisible(!passwordVisible)}
-                  >
-                    <Icon name={passwordVisible ? 'eye-slash' : 'eye'} size={20} color="#999" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles.inputContainer}>
-                <View style={styles.sliderContainer}>
-                  <Text style={styles.sliderLabel}>Tamanho da senha: {passwordLength}</Text>
-                  <Slider 
-                    style={styles.slider}
-                    minimumValue={8}
-                    maximumValue={32}
-                    step={1}
-                    value={passwordLength}
-                    onValueChange={handleSliderChange}
-                    minimumTrackTintColor="#3498db"
-                    maximumTrackTintColor="#ecf0f1"
-                    thumbTintColor="#3498db"
-                    thumbStyle={{width: 20, height: 20}}
-                  /> 
-                  <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setNewPassword(generateRandomPassword(passwordLength))}
+              <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <ScrollView 
+                  contentContainerStyle={styles.scrollContainer}
+                  keyboardShouldPersistTaps="handled" 
                 >
-                  <Text style={styles.buttonText}>Gerar Senha</Text>
-                </TouchableOpacity> 
-                </View>
-               
-              </View>
-              
+                  <Text style={styles.modalTitle}>Editar Login</Text>
 
-              <View style={styles.inputContainer}>
-                <Icon name="pencil" size={20} color="#999" style={styles.iconInput}/>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nota"
-                  value={newNote}
-                  onChangeText={setNewNote}
-                />
-              </View>
-              
+                  <View style={styles.inputContainer}>
+                    <Icon name="user" size={20} color="#999" style={styles.iconInput}/>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Usuário"
+                      value={newUsername}
+                      onChangeText={setNewUsername}
+                    />
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <Icon name="lock" size={20} color="#999" style={styles.iconInput}/>
+                    <View style={styles.passwordContainer}>
+                      <TextInput 
+                        style={styles.passwordInput}
+                        placeholder="Password"
+                        value={newPassword}
+                        secureTextEntry={!passwordVisible}
+                        onChangeText={setNewPassword}
+                      />
+                      <TouchableOpacity
+                        style={styles.eyeIcon}
+                        onPress={() => setPasswordVisible(!passwordVisible)}
+                      >
+                        <Icon name={passwordVisible ? 'eye-slash' : 'eye'} size={20} color="#999" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  <View style={styles.inputContainer}>
+                    <View style={styles.sliderContainer}>
+                      <Text style={styles.sliderLabel}>Tamanho da senha: {passwordLength}</Text>
+                      <Slider 
+                        style={styles.slider}
+                        minimumValue={8}
+                        maximumValue={32}
+                        step={1}
+                        value={passwordLength}
+                        onValueChange={handleSliderChange}
+                        minimumTrackTintColor="#3498db"
+                        maximumTrackTintColor="#ecf0f1"
+                        thumbTintColor="#3498db"
+                        thumbStyle={{width: 20, height: 20}}
+                      /> 
+                      <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => setNewPassword(generateRandomPassword(passwordLength))}
+                    >
+                      <Text style={styles.buttonText}>Gerar Senha</Text>
+                    </TouchableOpacity> 
+                    </View>
+                  
+                  </View>
+                  
 
-              <TouchableOpacity style={styles.button} onPress={handleSaveEdit}>
-                <Text style={styles.buttonText}>Salvar</Text>
-              </TouchableOpacity>
+                  <View style={styles.inputContainer}>
+                    <Icon name="pencil" size={20} color="#999" style={styles.iconInput}/>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Nota"
+                      value={newNote}
+                      onChangeText={setNewNote}
+                    />
+                  </View>
+                  
 
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
+                  <TouchableOpacity style={styles.button} onPress={handleSaveEdit}>
+                    <Text style={styles.buttonText}>Salvar</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </TouchableWithoutFeedback>
             </SafeAreaView>
           </Modal>
         </KeyboardAvoidingView>
