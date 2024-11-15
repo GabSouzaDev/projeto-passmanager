@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: 'center',
         marginBottom: 10,
+        width: '100%',
     },
 
     iconTrashService: {
@@ -68,6 +69,27 @@ const styles = StyleSheet.create({
     buttonText: {
         color: '#FFF',
         fontSize: 16,
+    },
+
+    //gerador de senha
+    sliderContainer: {
+       width: '100%',
+       padding: 20,
+       alignItems: 'center',
+    },
+
+    slider: {
+        width: '100%',
+        height: 40,
+        marginBottom: 20, 
+    },
+
+    sliderLabel: {
+        textAlign: 'center',
+        marginBottom: 10,
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#333',
     },
 
     //Tela de serviços

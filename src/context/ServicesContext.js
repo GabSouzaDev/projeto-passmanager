@@ -7,6 +7,7 @@ export const ServicesContext = createContext();
 //Provedor do contexto
 export const ServicesProvider = ({ children}) => {
     const [services, setServices] = useState([]);
+    const [passwordLength, setPasswordLength] = useState(12);
     const [expandedItem, setExpandedItem] = useState(null) //Estado para controlar a expansão de cada serviço.
 
     //Carregar serviços do AsyncStorage
@@ -75,7 +76,6 @@ export const ServicesProvider = ({ children}) => {
                 if(service.service === serviceName) {
                     if(entryUsername) {
                         //exclui um login específico
-                    
                         const filteredEntries = service.entries.filter(entry => entry.username !== entryUsername);
                         return {...service, entries: filteredEntries};
                     }

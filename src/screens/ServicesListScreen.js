@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FlatList, View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal, TextInput } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ServicesContext } from '../context/ServicesContext';
@@ -7,6 +7,7 @@ import * as Clipboard from 'expo-clipboard';
 import { generateRandomPassword } from '../utils/utils';
 import styles from '../styles/Styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Slider from '@react-native-community/slider';
 
 const ServicesListScreen = () => {
   const { 
@@ -24,6 +25,8 @@ const ServicesListScreen = () => {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newNote, setNewNote] = useState('');
+  const [passwordLength, setPasswordLength] = useState(12);
+  const debounceRef = useRef(null);
   
   
   //solicitar autenticação e exibir a senha
@@ -81,7 +84,7 @@ const ServicesListScreen = () => {
               },
               {
                 text: 'Excluir',
-                onPress: () => handleDeleteService(serviceName),
+                onPress: () => deleteService(serviceName),
               },
             ],
             { cancelable: false }
@@ -98,7 +101,7 @@ const ServicesListScreen = () => {
               },
               {
                 text: 'Excluir',
-                onPress: () => handleDeleteLogin(serviceName, entry.username),
+                onPress: () => deleteService(serviceName, entry.username),
               },
             ],
             { cancelable: false }
@@ -125,12 +128,13 @@ const ServicesListScreen = () => {
     }
   };
 
-  const handleDeleteService = (serviceName) => {
-    deleteService(serviceName);
-  }
-  const handleDeleteLogin = (serviceName) => {
-    deleteService(serviceName);
-  }
+  const handleSliderChange = (value) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(() => {
+      setPasswordLength(Math.round(value));
+    }, 200);
+  };
 
   const handleSaveEdit = async () => {
     if(!newUsername || !newPassword) {
@@ -272,12 +276,31 @@ const ServicesListScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setNewPassword(generateRandomPassword())}
-              >
-                <Text style={styles.buttonText}>Gerar Senha</Text>
-              </TouchableOpacity>
+              <View style={styles.inputContainer}>
+                <View style={styles.sliderContainer}>
+                  <Text style={styles.sliderLabel}>Tamanho da senha: {passwordLength}</Text>
+                  <Slider 
+                    style={styles.slider}
+                    minimumValue={8}
+                    maximumValue={32}
+                    step={1}
+                    value={passwordLength}
+                    onValueChange={handleSliderChange}
+                    minimumTrackTintColor="#3498db"
+                    maximumTrackTintColor="#ecf0f1"
+                    thumbTintColor="#3498db"
+                    thumbStyle={{width: 20, height: 20}}
+                  /> 
+                  <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setNewPassword(generateRandomPassword(passwordLength))}
+                >
+                  <Text style={styles.buttonText}>Gerar Senha</Text>
+                </TouchableOpacity> 
+                </View>
+               
+              </View>
+              
 
               <View style={styles.inputContainer}>
                 <Icon name="pencil" size={20} color="#999" style={styles.iconInput}/>
